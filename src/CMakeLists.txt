@@ -10,6 +10,11 @@ find_package(PNG)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(POPT popt)
 
+# Find readline if enabled
+if(ENABLE_READLINE)
+    find_package(Readline)
+endif()
+
 # Build static userland library
 add_library(piuserland STATIC
     plu_args.c
@@ -105,6 +110,15 @@ foreach(PROG ${PILOT_PROGRAMS})
         dl
         m
     )
+
+    # Add readline support for debugsh and dlpsh
+    if(${PROG} MATCHES "pilot-(debugsh|dlpsh)")
+        if(Readline_FOUND)
+            target_include_directories(${PROG} PRIVATE ${Readline_INCLUDE_DIRS})
+            target_link_libraries(${PROG} PRIVATE ${Readline_LIBRARIES})
+            target_compile_definitions(${PROG} PRIVATE HAVE_READLINE)
+        endif()
+    endif()
 
     # Set RPATH
     set_target_properties(${PROG} PROPERTIES

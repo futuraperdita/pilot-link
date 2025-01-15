@@ -20,6 +20,7 @@
 
 #include "pi-args.h"
 #include "pi-buffer.h"
+#include "pi-device.h"
 
 #ifdef HAVE_BLUEZ
 #include <bluetooth/sdp.h>

@@ -1,22 +1,74 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
+/* System headers */
 #cmakedefine HAVE_SYS_SOCKET_H
 #cmakedefine HAVE_SYS_TYPES_H
 #cmakedefine HAVE_INTTYPES_H
 #cmakedefine HAVE_STDINT_H
 #cmakedefine HAVE_SYS_TIME_H
+#cmakedefine HAVE_SYS_IOCTL_H
+#cmakedefine HAVE_SYS_SELECT_H
+#cmakedefine HAVE_TERMIOS_H
+#cmakedefine HAVE_UNISTD_H
+#cmakedefine HAVE_DIRENT_H
+#cmakedefine HAVE_STRING_H
+
+/* System functions */
+#cmakedefine HAVE_CFMAKERAW
+#cmakedefine HAVE_CFSETSPEED
+#cmakedefine HAVE_STRDUP
+#cmakedefine HAVE_STRERROR
+#cmakedefine HAVE_GETTIMEOFDAY
+
+/* Types and their sizes */
+#cmakedefine HAVE_LONG_LONG
+#cmakedefine HAVE_UNSIGNED_LONG_LONG
+#cmakedefine HAVE_SIZE_T
+#cmakedefine HAVE_SSIZE_T
 #cmakedefine HAVE_SOCKLEN_T
 
+/* System characteristics */
+#cmakedefine WORDS_BIGENDIAN
+
+/* System configuration */
 #define HOST_OS "@HOST_OS@"
 #define NULL_DEVICE "@NULL_DEVICE@"
 
-/* Define pl_socklen_t as socklen_t */
+/* Feature configuration */
+#cmakedefine HAVE_BLUEZ
+#cmakedefine HAVE_USB
+#cmakedefine HAVE_READLINE
+
+/* Define pl_socklen_t */
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#ifdef HAVE_SOCKLEN_T
 typedef socklen_t pl_socklen_t;
 #else
 typedef int pl_socklen_t;
 #endif
+#else
+typedef int pl_socklen_t;
+#endif
+
+/* Define missing types if needed */
+#ifndef HAVE_SIZE_T
+typedef unsigned int size_t;
+#endif
+
+#ifndef HAVE_SSIZE_T
+typedef int ssize_t;
+#endif
+
+/* Feature macros */
+#cmakedefine01 ENABLE_USB
+#cmakedefine01 ENABLE_BLUETOOTH
+#cmakedefine01 ENABLE_THREADS
+#cmakedefine01 ENABLE_READLINE
+
+/* Build configuration */
+#cmakedefine01 BUILD_SHARED_LIBS
+#cmakedefine01 BUILD_STATIC_LIBS
 
 #endif /* _CONFIG_H_ */

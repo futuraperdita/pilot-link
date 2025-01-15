@@ -59,65 +59,90 @@ if(ENABLE_USB)
     endif()
 endif()
 
-# Create the library
-add_library(pisock SHARED ${PISOCK_SOURCES})
-target_include_directories(pisock
-    PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
-        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
-        $<INSTALL_INTERFACE:include/pilot-link>
-    PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}
-        ${CMAKE_BINARY_DIR}
-)
-
-target_compile_definitions(pisock
-    PUBLIC
-        HAVE_CONFIG_H
-        _GNU_SOURCE
-    PRIVATE
-        BUILDING_PISOCK
-)
-
-# Link dependencies
-target_link_libraries(pisock
-    PRIVATE
-        pthread
-        dl
-        m
-)
-
-if(ENABLE_THREADS)
-    target_link_libraries(pisock PRIVATE Threads::Threads)
+# Create the shared library if enabled
+if(BUILD_SHARED_LIBS)
+    add_library(pisock SHARED ${PISOCK_SOURCES})
+    set_target_properties(pisock PROPERTIES
+        VERSION ${PROJECT_VERSION}
+        SOVERSION ${PROJECT_VERSION_MAJOR}
+        C_VISIBILITY_PRESET default
+        VISIBILITY_INLINES_HIDDEN OFF
+        POSITION_INDEPENDENT_CODE ON
+        ENABLE_EXPORTS ON
+    )
 endif()
 
-if(ENABLE_BLUETOOTH AND BLUEZ_FOUND)
-    target_link_libraries(pisock PRIVATE ${BLUEZ_LIBRARIES})
-    target_include_directories(pisock PRIVATE ${BLUEZ_INCLUDE_DIRS})
-    target_compile_definitions(pisock PRIVATE HAVE_BLUEZ)
+# Create the static library if enabled
+if(BUILD_STATIC_LIBS)
+    add_library(pisock_static STATIC ${PISOCK_SOURCES})
+    set_target_properties(pisock_static PROPERTIES
+        OUTPUT_NAME pisock
+        POSITION_INDEPENDENT_CODE ON
+    )
 endif()
 
-if(ENABLE_USB)
-    if(LIBUSB_FOUND)
-        target_link_libraries(pisock PRIVATE ${LIBUSB_LIBRARIES})
-        target_include_directories(pisock PRIVATE ${LIBUSB_INCLUDE_DIRS})
+# Common settings for both libraries
+foreach(target IN ITEMS pisock pisock_static)
+    if(TARGET ${target})
+        target_include_directories(${target}
+            PUBLIC
+                $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+                $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
+                $<INSTALL_INTERFACE:include/pilot-link>
+            PRIVATE
+                ${CMAKE_CURRENT_SOURCE_DIR}
+                ${CMAKE_BINARY_DIR}
+        )
+
+        target_compile_definitions(${target}
+            PUBLIC
+                HAVE_CONFIG_H
+                _GNU_SOURCE
+            PRIVATE
+                BUILDING_PISOCK
+        )
+
+        # Link dependencies
+        target_link_libraries(${target}
+            PRIVATE
+                pthread
+                dl
+                m
+        )
+
+        if(ENABLE_THREADS)
+            target_link_libraries(${target} PRIVATE Threads::Threads)
+        endif()
+
+        if(ENABLE_BLUETOOTH AND BLUEZ_FOUND)
+            target_link_libraries(${target} PRIVATE ${BLUEZ_LIBRARIES})
+            target_include_directories(${target} PRIVATE ${BLUEZ_INCLUDE_DIRS})
+            target_compile_definitions(${target} PRIVATE HAVE_BLUEZ)
+        endif()
+
+        if(ENABLE_USB)
+            if(LIBUSB_FOUND)
+                target_link_libraries(${target} PRIVATE ${LIBUSB_LIBRARIES})
+                target_include_directories(${target} PRIVATE ${LIBUSB_INCLUDE_DIRS})
+            endif()
+            target_compile_definitions(${target} PRIVATE HAVE_USB)
+        endif()
     endif()
-    target_compile_definitions(pisock PRIVATE HAVE_USB)
-endif()
-
-set_target_properties(pisock PROPERTIES
-    VERSION ${PROJECT_VERSION}
-    SOVERSION ${PROJECT_VERSION_MAJOR}
-    C_VISIBILITY_PRESET default
-    VISIBILITY_INLINES_HIDDEN OFF
-    POSITION_INDEPENDENT_CODE ON
-    ENABLE_EXPORTS ON
-)
+endforeach()
 
 # Installation
-install(TARGETS pisock
-    EXPORT PilotLinkTargets
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
+if(BUILD_SHARED_LIBS)
+    install(TARGETS pisock
+        EXPORT PilotLinkTargets
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    )
+endif()
+
+if(BUILD_STATIC_LIBS)
+    install(TARGETS pisock_static
+        EXPORT PilotLinkTargets
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    )
+endif()
