@@ -4,6 +4,13 @@ project(pilot-link
         DESCRIPTION "Suite of tools for moving data between Palm devices and computers"
         LANGUAGES C)
 
+# Extract version components for pi-version.h
+string(REGEX MATCH "^([0-9]+)\\.([0-9]+)\\.([0-9]+)" _ ${PROJECT_VERSION})
+set(PILOT_LINK_VERS ${CMAKE_MATCH_1})
+set(PILOT_LINK_MAJOR ${CMAKE_MATCH_2})
+set(PILOT_LINK_MINOR ${CMAKE_MATCH_3})
+set(PILOT_LINK_PATCH "")
+
 # Set output directories
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
