@@ -27,6 +27,9 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/socket.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #include "pi-debug.h"
 #include "pi-source.h"
@@ -44,7 +47,6 @@
 #ifndef O_NONBLOCK
 # define O_NONBLOCK 0
 #endif
-
 
 static int u_open(pi_socket_t *ps, struct pi_sockaddr *addr, size_t addrlen);
 static int u_close(pi_socket_t *ps);
@@ -68,18 +70,6 @@ void pi_usb_impl_init (struct pi_usb_impl *impl)
 	impl->control_request	= NULL;
 }
 
-
-/***********************************************************************
- *
- * Function:    u_open
- *
- * Summary:     Open the usb port and establish a connection for
- *
- * Parameters:  None
- *
- * Returns:     The file descriptor
- *
- ***********************************************************************/
 static int
 u_open(pi_socket_t *ps, struct pi_sockaddr *addr, size_t addrlen)
 {
@@ -110,18 +100,6 @@ u_open(pi_socket_t *ps, struct pi_sockaddr *addr, size_t addrlen)
 	return fd;
 }
 
-
-/***********************************************************************
- *
- * Function:    u_close
- *
- * Summary:     Close the open socket/file descriptor
- *
- * Parameters:  None
- *
- * Returns:     Nothing
- *
- ***********************************************************************/
 static int
 u_close(pi_socket_t *ps)
 {
@@ -131,18 +109,6 @@ u_close(pi_socket_t *ps)
 	return close(ps->sd);
 }
 
-
-/***********************************************************************
- *
- * Function:    u_poll
- *
- * Summary:     Poll the open socket/file descriptor
- *
- * Parameters:  None
- *
- * Returns:     1 on success, PI_ERR_SOCK_TIMEOUT on timeout
- *
- ***********************************************************************/
 static int
 u_poll(pi_socket_t *ps, int timeout)
 {
@@ -176,18 +142,6 @@ u_poll(pi_socket_t *ps, int timeout)
 	return 1;
 }
 
-
-/***********************************************************************
- *
- * Function:    u_write
- *
- * Summary:     Write to the open socket/file descriptor
- *
- * Parameters:  None
- *
- * Returns:     Nothing
- *
- ***********************************************************************/
 static int
 u_write(pi_socket_t *ps, unsigned char *buf, size_t len, int flags)
 {
@@ -231,18 +185,6 @@ u_write(pi_socket_t *ps, unsigned char *buf, size_t len, int flags)
 	return len;
 }
 
-
-/***********************************************************************
- *
- * Function:    u_read_buf
- *
- * Summary:     read buffer
- *
- * Parameters:  pi_socket_t*, char* to buffer, length of buffer
- *
- * Returns:     number of bytes read
- *
- ***********************************************************************/
 static int
 u_read_buf (pi_socket_t *ps, pi_buffer_t *buf, size_t len, int flags) 
 {
@@ -269,18 +211,6 @@ u_read_buf (pi_socket_t *ps, pi_buffer_t *buf, size_t len, int flags)
 	return rbuf;
 }
 
-
-/***********************************************************************
- *
- * Function:    u_read
- *
- * Summary:     Read incoming data from the socket/file descriptor
- *
- * Parameters:  pi_socket_t*, char* to buffer, buffer length, flags
- *
- * Returns:     number of bytes read or negative otherwise
- *
- ***********************************************************************/
 static int
 u_read(pi_socket_t *ps, pi_buffer_t *buf, size_t len, int flags)
 {
@@ -350,23 +280,6 @@ u_read(pi_socket_t *ps, pi_buffer_t *buf, size_t len, int flags)
 	return rbuf;
 }
 
-/***********************************************************************
- *
- * Function:    u_flush
- *
- * Summary:	Flush incoming and/or outgoing data from the socket/file
- *		descriptor
- *
- * Parameters:	ps is of type pi_socket that contains the sd member which is
- *              the file descriptor that the data in buf will be read. It
- *              also contains the read buffer.
- *
- *		flags is of type int and can be a combination of
- *		PI_FLUSH_INPUT and PI_FLUSH_OUTPUT
- *
- * Returns:	0
- *
- ***********************************************************************/
 static int
 u_flush(pi_socket_t *ps, int flags)
 {
@@ -383,7 +296,7 @@ u_flush(pi_socket_t *ps, int flags)
 			fcntl(ps->sd, F_SETFL, fl | O_NONBLOCK);
 			while (recv(ps->sd, buf, sizeof(buf), 0) > 0)
 				;
-			fcntl(ps->sd, F_SETFL, 0);
+			fcntl(ps->sd, F_SETFL, fl);
 		}
 
 		LOG((PI_DBG_DEV, PI_DBG_LVL_DEBUG,

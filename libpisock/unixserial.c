@@ -68,10 +68,10 @@
 
 #ifndef HAVE_CFSETSPEED
 #if defined(HAVE_CFSETISPEED) && defined(HAVE_CFSETOSPEED)
-#define cfsetspeed(t,speed) \
+#define pi_cfsetspeed(t,speed) \
   (cfsetispeed(t,speed) || cfsetospeed(t,speed))
 #else
-static int cfsetspeed(struct termios *t, int speed)
+static int pi_cfsetspeed(struct termios *t, int speed)
 {
 #ifdef HAVE_TERMIOS_CSPEED
 	t->c_ispeed = speed;
@@ -82,6 +82,7 @@ static int cfsetspeed(struct termios *t, int speed)
 	return 0;
 }
 #endif
+#define cfsetspeed pi_cfsetspeed
 #endif
 
 #endif /* SGTTY */

@@ -35,6 +35,15 @@
 #include <ctype.h>
 #include <string.h>
 
+/* Type definitions for older systems */
+#ifndef u_long
+typedef unsigned long u_long;
+#endif
+
+#ifndef u_int
+typedef unsigned int u_int;
+#endif
+
 #include "pi-debug.h"
 #include "pi-source.h"
 
@@ -119,7 +128,7 @@ char *strdup(const char *s)
 #endif
 
 /* Put STRING, which is of the form "NAME=VALUE", in the environment */
-int putenv(const char *string)
+int pi_putenv(const char *string)
 {
 	const char 	*const name_end = strchr(string, '=');
 	register 	size_t size;

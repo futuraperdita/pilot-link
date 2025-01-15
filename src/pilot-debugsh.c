@@ -23,6 +23,8 @@
 #include <config.h>
 #endif
 
+#define TTYPrompt "port | <device path>"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

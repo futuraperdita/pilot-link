@@ -56,10 +56,15 @@
 #include <unistd.h>
 
 #include "pi-args.h"
+#include "pi-export.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/* Combine PI_EXPORT and PI_ARGS into a single macro */
+#define PI_EXPORTED_FUNCTION(ret_type, name, args) \
+    extern PI_EXPORT ret_type name PI_ARGS(args)
 
 #include "pi-version.h"
 #include "pi-sockaddr.h"
@@ -201,7 +206,7 @@ typedef struct pi_socket_list
 	 * @param protocol Protocol to use (usually #PI_PF_DLP for #PI_SOCK_STREAM sockets)
 	 * @return Socket ID
 	 */
-	extern int pi_socket PI_ARGS((int domain, int type, int protocol));
+	PI_EXPORTED_FUNCTION(int, pi_socket, (int domain, int type, int protocol));
 
 	/** @brief Assign a new socket descriptor
 	 *
@@ -214,7 +219,7 @@ typedef struct pi_socket_list
 	 * @param pi_sd New socket descriptor
 	 * @return The socket structure's new socket descriptor value or negative on error
 	 */
-	extern int pi_socket_setsd PI_ARGS((pi_socket_t *ps, int pi_sd));
+	PI_EXPORTED_FUNCTION(int, pi_socket_setsd, (pi_socket_t *ps, int pi_sd));
 
 	/** @brief Get socket name
 	 *
@@ -225,8 +230,8 @@ typedef struct pi_socket_list
 	 * @param namelen On input, the size allocated to receive the name. On output, the actual name length
 	 * @return 0 on success, negative on error
 	 */
-	extern int pi_getsockname
-	    PI_ARGS((int pi_sd, struct sockaddr * remote_addr, size_t *namelen));
+	PI_EXPORTED_FUNCTION(int, pi_getsockname,
+	    (int pi_sd, struct sockaddr * remote_addr, size_t *namelen));
 
 	/** @brief Get a socket's remote address
 	 *
@@ -235,8 +240,8 @@ typedef struct pi_socket_list
 	 * @param namelen On input, maximum name/address length. On output, actual length
 	 * @return 0 on success, negative on error.
 	 */
-	extern int pi_getsockpeer
-	    PI_ARGS((int pi_sd, struct sockaddr * remote_addr, size_t *namelen));
+	PI_EXPORTED_FUNCTION(int, pi_getsockpeer,
+	    (int pi_sd, struct sockaddr * remote_addr, size_t *namelen));
 
 	/** @brief Get a socket option
 	 *
@@ -250,7 +255,7 @@ typedef struct pi_socket_list
 	 * @param option_len Len of the pointed option_value.
 	 * @return Negative code on error
 	 */
-	extern int pi_getsockopt
+	extern PI_EXPORT int pi_getsockopt
 	    PI_ARGS((int pi_sd, int level, int option_name,
 		     void *option_value, size_t *option_len));
 
@@ -266,7 +271,7 @@ typedef struct pi_socket_list
 	 * @param option_len Len of the pointed option_value.
 	 * @return Negative code on error
 	 */
-	extern int pi_setsockopt
+	extern PI_EXPORT int pi_setsockopt
 	    PI_ARGS((int pi_sd, int level, int option_name, 
 		     const void *option_value, size_t *option_len));
 
@@ -280,7 +285,7 @@ typedef struct pi_socket_list
 	 * @param level Protocol level (see #PiOptLevels enum)
 	 * @return Protocol structure pointer or NULL if not found
 	 */
-	extern struct pi_protocol *pi_protocol
+	extern PI_EXPORT struct pi_protocol *pi_protocol
 	    PI_ARGS((int pi_sd, int level));
 
 	/** @brief Browse the protocol stack
@@ -296,7 +301,7 @@ typedef struct pi_socket_list
 	 * @param level Level from which you want to get the next protocol (see #PiOptLevels enum)
 	 * @return Protocol structure ptr, or NULL if not found
 	 */
-	extern struct pi_protocol *pi_protocol_next
+	extern PI_EXPORT struct pi_protocol *pi_protocol_next
 	    PI_ARGS((int pi_sd, int level));	
 /*@}*/
 
@@ -310,7 +315,7 @@ typedef struct pi_socket_list
 	 * @param pi_sd Socket descriptor
 	 * @return != 0 if a connection is established
 	 */
-	extern int pi_socket_connected
+	extern PI_EXPORT int pi_socket_connected
 		PI_ARGS((int pi_sd));
 
 	/** @brief Connect to a remote server
@@ -321,7 +326,7 @@ typedef struct pi_socket_list
 	 * @param port Port string (see pi_bind() description)
 	 * @return Negative on error
 	 */
-	extern PI_ERR pi_connect
+	extern PI_EXPORT PI_ERR pi_connect
 	    PI_ARGS((int pi_sd, const char *port));
 
 	/** @brief Bind the socket to a specific port
@@ -335,10 +340,10 @@ typedef struct pi_socket_list
 	 * @param port Port string as described above
 	 * @return Negative error code on error
 	 */
-	extern PI_ERR pi_bind
+	extern PI_EXPORT PI_ERR pi_bind
 	    PI_ARGS((int pi_sd, const char *port));
 
-	extern PI_ERR pi_listen PI_ARGS((int pi_sd, int backlog));
+	extern PI_EXPORT PI_ERR pi_listen PI_ARGS((int pi_sd, int backlog));
 
 	/** @brief Wait for a handheld
 	 *
@@ -350,7 +355,7 @@ typedef struct pi_socket_list
 	 * @param namelen Unused. Pass NULL.
 	 * @return Negative error code on error, returns 0 once a device connects
 	 */
-	extern PI_ERR pi_accept
+	extern PI_EXPORT PI_ERR pi_accept
 	    PI_ARGS((int pi_sd, struct sockaddr * remote_addr,
 		     size_t *namelen));
 
@@ -366,7 +371,7 @@ typedef struct pi_socket_list
 	 * @param timeout Number of seconds to wait. Pass 0 to wait forever.
 	 * @return Negative error code on error, returns 0 once a device connects
 	 */
-	extern PI_ERR pi_accept_to
+	extern PI_EXPORT PI_ERR pi_accept_to
 	    PI_ARGS((int pi_sd, struct sockaddr * remote_addr, size_t *namelen,
 		     int timeout));
 
@@ -379,7 +384,7 @@ typedef struct pi_socket_list
 	 * @param pi_sd Socket descriptor
 	 * @return Negative error code on error
 	 */
-	extern int pi_close PI_ARGS((int pi_sd));
+	extern PI_EXPORT int pi_close PI_ARGS((int pi_sd));
 /*@}*/
 
 /** @name Low-level data transfers */
@@ -399,7 +404,7 @@ typedef struct pi_socket_list
 	 * @param flags No write flag defined at this time
 	 * @return Number of bytes sent. Negative on error.
 	 */
-	extern int pi_send
+	extern PI_EXPORT int pi_send
 	    PI_ARGS((int pi_sd, PI_CONST void *msg, size_t len, int flags));
 
 	/** @brief Wait for incoming data from the device
@@ -418,7 +423,7 @@ typedef struct pi_socket_list
 	 * @param flags Read flags. Use #PI_MSG_PEEK to leave data in the input buffer.
 	 * @return Number of bytes read. Negative on error.
 	 */
-	extern ssize_t pi_recv
+	extern PI_EXPORT ssize_t pi_recv
 	    PI_ARGS((int pi_sd, pi_buffer_t *msg, size_t len, int flags));
 
 	/** @brief Wait for incoming data from the device
@@ -430,7 +435,7 @@ typedef struct pi_socket_list
 	 * @param len Size of the data we want to read
 	 * @return Number of bytes read. Negative on error.
 	 */
-	extern ssize_t pi_read PI_ARGS((int pi_sd, pi_buffer_t *msg, size_t len));
+	extern PI_EXPORT ssize_t pi_read PI_ARGS((int pi_sd, pi_buffer_t *msg, size_t len));
 
 	/** @brief Write data on the given socket
 	 *
@@ -441,7 +446,7 @@ typedef struct pi_socket_list
 	 * @param datasize Size of the data to send
 	 * @return Number of bytes sent. Negative on error.
 	 */
-	extern ssize_t pi_write PI_ARGS((int pi_sd, PI_CONST void *databuf, size_t datasize));
+	extern PI_EXPORT ssize_t pi_write PI_ARGS((int pi_sd, PI_CONST void *databuf, size_t datasize));
 
 	/** @brief Flush input and/or output bytes
 	 *
@@ -453,7 +458,7 @@ typedef struct pi_socket_list
 	 * @param flags Mask with valus #PI_FLUSH_INPUT, #PI_FLUSH_OUTPUT.
 	 * @return Negative on error
 	 */
-	extern void pi_flush PI_ARGS((int pi_sd, int flags));
+	extern PI_EXPORT void pi_flush PI_ARGS((int pi_sd, int flags));
 /*@}*/
 
 /** @name Error codes management */
@@ -466,7 +471,7 @@ typedef struct pi_socket_list
 	 * @param pi_sd Socket descriptor
 	 * @return Error code or 0 if no error or #PI_ERR_SOCK_INVALID is socket was not found
 	 */
-	extern int pi_error
+	extern PI_EXPORT int pi_error
 		PI_ARGS((int pi_sd));
 
 	/** @brief Set the last error code
@@ -478,7 +483,7 @@ typedef struct pi_socket_list
 	 * @param error_code Error code to set
 	 * @return The error code
 	 */
-	extern int pi_set_error
+	extern PI_EXPORT int pi_set_error
 		PI_ARGS((int pi_sd, int error_code));
 
 	/** @brief Get the last Palm OS error code the device returned to us
@@ -493,7 +498,7 @@ typedef struct pi_socket_list
 	 * @param pi_sd Socket descriptor
 	 * @return The Palm OS error code or #PI_ERR_SOCK_INVALID if socket was not found
 	 */
-	extern int pi_palmos_error
+	extern PI_EXPORT int pi_palmos_error
 		PI_ARGS((int pi_sd));
 
 	/** @brief Set the last Palm OS error code
@@ -504,7 +509,7 @@ typedef struct pi_socket_list
 	 * @param error_code Error code to set
 	 * @return The error code
 	 */
-	extern int pi_set_palmos_error
+	extern PI_EXPORT int pi_set_palmos_error
 		PI_ARGS((int pi_sd, int error_code));
 
 	/** @brief Clear both the last error code and the last Palm OS error code
@@ -513,7 +518,7 @@ typedef struct pi_socket_list
 	 *
 	 * @param sd Socket descriptor
 	 */
-	extern void pi_reset_errors
+	extern PI_EXPORT void pi_reset_errors
 		PI_ARGS((int sd));
 /*@}*/
 
@@ -528,7 +533,7 @@ typedef struct pi_socket_list
 	 * @param pi_sd Socket descriptor
 	 * @return DLP version or #PI_ERR_SOCK_INVALID if socket was not found
 	 */
-	extern PI_ERR pi_version PI_ARGS((int pi_sd));
+	extern PI_EXPORT PI_ERR pi_version PI_ARGS((int pi_sd));
 	
 	/** @brief Return the maximum size of a database record that can be transferred
 	 *
@@ -544,7 +549,7 @@ typedef struct pi_socket_list
 	 * @param pi_sd Socket descriptor
 	 * @return Maximum record transfer size
 	 */
-	extern unsigned long pi_maxrecsize PI_ARGS((int pi_sd));
+	extern PI_EXPORT unsigned long pi_maxrecsize PI_ARGS((int pi_sd));
 
 	/** @brief Tickle a stream connection to keep it alive
 	 *
@@ -558,7 +563,7 @@ typedef struct pi_socket_list
 	 * @param pi_sd Socket descriptor
 	 * @return An error code if an error occured (see pi-error.h)
 	 */
-	extern PI_ERR pi_tickle PI_ARGS((int pi_sd));
+	extern PI_EXPORT PI_ERR pi_tickle PI_ARGS((int pi_sd));
 
 	/** @brief Set a watchdog that will call pi_tickle() at regular intervals
 	 *
@@ -570,7 +575,7 @@ typedef struct pi_socket_list
 	 * @param interval Time interval in seconds between alarms
 	 * @return 0, or #PI_ERR_SOCK_INVALID if the socket wasn't found
 	 */
-	extern int pi_watchdog PI_ARGS((int pi_sd, int interval));
+	extern PI_EXPORT int pi_watchdog PI_ARGS((int pi_sd, int interval));
 /*@}*/
 
 #ifdef __cplusplus

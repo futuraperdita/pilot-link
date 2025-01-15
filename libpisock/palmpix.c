@@ -29,10 +29,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#if HAVE_STDINT_H
+#ifdef HAVE_STDINT_H
 # include <stdint.h>
 #else
-# if HAVE_INTTYPES_H
+# ifdef HAVE_INTTYPES_H
 #  include <inttypes.h>
 # else
 

@@ -1,0 +1,22 @@
+#ifndef _CONFIG_H_
+#define _CONFIG_H_
+
+#cmakedefine HAVE_SYS_SOCKET_H
+#cmakedefine HAVE_SYS_TYPES_H
+#cmakedefine HAVE_INTTYPES_H
+#cmakedefine HAVE_STDINT_H
+#cmakedefine HAVE_SYS_TIME_H
+#cmakedefine HAVE_SOCKLEN_T
+
+#define HOST_OS "@HOST_OS@"
+#define NULL_DEVICE "@NULL_DEVICE@"
+
+/* Define pl_socklen_t as socklen_t */
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+typedef socklen_t pl_socklen_t;
+#else
+typedef int pl_socklen_t;
+#endif
+
+#endif /* _CONFIG_H_ */
